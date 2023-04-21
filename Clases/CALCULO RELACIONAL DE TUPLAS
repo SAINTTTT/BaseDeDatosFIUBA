@@ -1,0 +1,13 @@
+CALCULO RELACIONAL DE TUPLAS
+Es analogo a la logica de predicados, donde se devuelve V o F dependiendo de las condiciones de las tuplas
+Aqui las variables son las tuplas
+
+Del lado izquierdo pondre el resultado que quiero obtener
+Del lado derecho pondre el predicado 
+
+{ resultado (atributos) | funcion de una tupla }
+
+Ej: Quiero la lista de los nombres de paises que jugaron el Mundial 2010
+
+            { t.name |  NationalTeam(t) }
+            

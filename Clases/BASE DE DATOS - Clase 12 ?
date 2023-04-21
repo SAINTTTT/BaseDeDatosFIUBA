@@ -1,0 +1,52 @@
+BASE DE DATOS - Clase 8/7
+SEGURIDAD
+
+- SEGURIDAD DE LA INFORMACION es el conjunto de procedimientos y medidas que son tomadas por la organizacion para proteger los componentes de los sisetmas de informacion
+Tiene que implicar: 
+. confidencialidad que es que nadie no debido debe ver la informacion de alguien o algo mas),
+. integridad que es asegurar la integridad del dato, es decir, que nadie modifique el dato ilegalemente
+. disponibilidad que es asegurar que la informacion estara cuando se la solicite o requiera
+. no repudio es poder afirmar que el que accedio a la informacion, era quien decia ser y que no era otro
+Estos puntos deben ser tenidos en cuenta en todos los niveles: personas, aplicacion, red, SO, SGBD, archivos.
+
+Toda organizacion grande deberia tener una politica de seguridad bien definida
+
+CONTROL DE ACCESO BASADO EN ROLES
+Comienza con dos sistemas implementados en los 80 por el Departamento de Defensa de EEUU
+DAC (discretionary access control): Un objeto solo puede ser accedido por el usuario o grupo al que pertenece
+MAC (mandatory access control): El sistema determina el control de acceso, estableciendo relaciones entre usuarios y objetos. Le asigna un nivel jerarquico a ambos que determina el poder de acceso a los archivos.
+
+En los 90 surge el CONTROL DE ACCESO BASADO EN ROLES (RBAC)
+Su principal caracteristica es la definicion de ROLES para regular el acceso de los usuarios a los recursos
+Se define: 
+usuarios: personas
+Roles: conjunto de funciones y responsabilidades
+objetos: Aquello a ser protegido. Puede ser una tabla, documento, fila, tupla, atributo, etc.. NO ES NECESARIAMENTE TODA LA BDD O TABLA
+Operaciones: Son las acciones a realizar sobre los objetos
+PErmisos: Acciones concedidas o revocadas a un usuario o rol sobre un objeto determinado
+
+Existe una JERARQUIA DE ROLES. Implementa tres principios
+. Menor privilegio posible: A un usuario se le da el menor privilegio posible. No se le da mas poder que el que necesita
+. Division de responsabilidades: Se busca que nadie tenga el poder suficiente sobre el sistema para que pueda por si misma sacar beneficios propios.
+. Abstraccion de datos: Las operaciones dependen de los datos
+
+VER VIDEO SOBRE EJEMPLO DE ESTO EN POSTGRES. DATABASE-SCHEMA-ROL
+
+- En POSTGRES
+En la cima de la jerarquia estan las BASES
+Luego, las BASES estan formadas por cero o mas ESQUEMAS (separaciones logicas de las tablas)
+Un ESQUEMAS es un conjunto de TABLAS
+
+-----------------------------------------------------------------------------------------
+SQL INJECTION
+Es un ataque a una BDD que consiste en manipular a nivel de aplicacion las variables de entrada de una consulta SQL de manera de modificarla
+Objetivos o consecuencias de estos ataques:
+    - Acceso no autorizado a los datos
+    - Eliminacion malintencionada de datos
+    - Alteracion de datos o falsificacion de la informacion
+
+Precauciones
+    - Utilizar una funcion de escapeo
+    - Aprovechar el mecanismo de RBAC dando el menor privilegio posible al usuario (no dar privilegio de escritura)
+    - Validar parametros
+    - Utilizar consultas parametrizadas que son las que tienen la estructura predifinida

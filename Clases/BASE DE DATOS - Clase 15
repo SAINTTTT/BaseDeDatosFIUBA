@@ -1,0 +1,19 @@
+BASE DE DATOS - Clase 15
+
+JUNTA
+Metodo de loops anidados por bloque:
+
+Metodo de unico loop:
+
+
+Hasta ahora calculamos el costo de una operacion, es decir, cuantos movimientos de bloques nos costaba
+
+Ahora queremos ver la CARDINALIDAD (tamaño de las relaciones intermedias)
+Tiene que ser precisa, facil de calcular y no depender de la forma de calculo de esa relacion
+
+Veremos ejemplos con
+- proyeccion
+La cardinalidad se va a representar en funcino de N() o B(), dependiendo de cual quiero elegir para estimar
+
+- seleccion
+Aca cambia el N, porque al seleccionar si saco tuplas. El F no cambia
