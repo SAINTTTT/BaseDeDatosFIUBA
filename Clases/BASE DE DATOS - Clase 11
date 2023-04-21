@@ -1,0 +1,106 @@
+BASE DE DATOS - Clase 1/7 
+NoSQL orientado a grafos
+
+- BASES DE DATOS ORIENTADA A GRAFOS (Neo4j)
+Aca la estructura es la de un grafo, es decir, que hay nodos y arcos
+Las BDD orientadas a grafos sirven para modelar interrelaciones mas complejas entre las entidades
+No tienen el concepto de agregado a diferencia de los demas NoSQL
+
+En estas BDD existen una LISTA DE ADYACENCIAS que contiene todos los nodos adyacentes de cada nodo. Cada nodo tiene su lista
+Los arcos siempres son direccionales en Neo4j, aunque no es necesario indicarle siempre la direccion
+
+Utiliza un lenguaje declarativo llamado Cypher
+
+La BDD esta formada por nodos, donde cada nodo tiene uno o varios labels o etiquetas (ej: Persona)
+Dentro de cada label, el nodo tiene propiedades con valores
+
+Ejemplo de consulta en Cypher: MATCH (p:Persona {nombre: ‘María’}) RETURN p.nombre, p.prof
+
+"p:persona" le indica primero un alias 'p' que no se guarda, sino que es utilizado solo en la consulta
+Luego le dice que busque todas las cosas que sean "Persona" cuyo "nombre" sea "Maria" y las trabaje como 'p'
+Es analogo a poner un WHERE p.nombre = Maria
+
+Los arcos o interrelaciones tienen que tener nombre y opcionalmente puede tener un atributo. Tienen que ser direccionales
+Ej:     CREATE (juan)−[:AMIGO_DE]−>(lucas)
+Tambien es necesario que tenga una flecha para algun lado, es decir, tiene que ser dirigido
+Este tipo de notacion marcando el vinculo sirve tambien para otras operaciones
+EJ:     MATCH (n:Persona)−[:AMIGO_DE]−(m:Persona),
+              (m:Persona)−[:AMIGO_DE]−(o:Persona),
+              (n:Persona)−[:ENEMIGO_DE]−(o:Persona)
+        RETURN n.nombre, o.nombre
+
+Con un * puedo indicar la cantidad de saltos entre dos nodos
+Ej:     MATCH (a:Actor)-[*4]-(kb:Actor {name:"Kevin Bacon"}) RETURN a.name
+Esto devuelve los actores que estan a distancia 4 de Kevin Bacon
+
+En definitiva, Neo4j trabaja con patrones en sus declaraciones
+Un patron puede especificarse a traves de los nodos y sus propiedades, una interrelacion y sus propiedades, o un camino y sus propiedades
+A cada patron se le puede asignar un nombre (el alias)
+
+
+--------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+(((((((((((((PRACTICA)))))))))))))))))))))))
+
+call db.schema() me da una vision general del grafo. Me da los nodos y aristas
+
+El PATRON DE NODOS es la semantica para indicar los nodos. La unica condicion obligatoria es que este entre parentesis
+En una REGEX, el '.' indica 'cualquier caracter' y el '*' indica que puede aparecer N veces
+
+
+
+Ejercicios de la diapositiva 
+((((((((((TALLER)))))))))))))))
+1- MATCH (m {genre:"Science Fiction"}) RETURN m.title ORDER BY m.title LIMIT 10
+
+2- MATCH (m:Movie) WHERE m.genre="Drama" AND  m.studio =~".*Pictures.*" RETURN m.title, m.studio
+
+3- MATCH(a:Actor) WHERE a:Director AND a.birthday IS NOT NULL RETURN date(dateTime({epochmillis:toInt(a.birthday)})) LIMIT 20
+
+Otra opcion de la 3
+MATCH (a:Actor:Director) WHERE a.birthday IS NOT NULL RETURN ....
+
+4- MATCH (d:Director)-[dir:DIRECTED]->(m:Movie) WHERE d.name = "Oliver Stone" return d,m
+
+5- MATCH (a:Actor)-[ac:ACTS_IN]->(m:Movie)<-[ac2:ACTS_IN]-(th:Actor {name:"Tom Hanks"}) RETURN DISTINCT a.name ORDER BY a.name
+
+6- MATCH (a:Actor)-[*4]-(kb:Actor {name:"Kevin Bacon"}) RETURN a.name LIMIT 10
+
+7- MATCH (wa:Director {name:"Woody Allen"})-[d:DIRECTED]->(m:Movie) WHERE NOT (wa)-[:ACTS_IN]->(m) RETURN wa,m
+
+8- MATCH sp=shortestPath((kb: Actor {name:"Kevin Bacon"})-[*]-(mr: Actor {name:"Meg Ryan"})) RETURN sp
+
+9- MATCH (a:Actor)-[:ACTS_IN]-(m:Movie{title:"The Matrix"}), (a)-[:ACTS_IN]-(m2:Movie{title:"The Matrix Reloaded"}),
+(a)-[:ACTS_IN]-(m3:Movie{title:"The Matrix Revolutions"}) RETURN a.name
+
+10- MATCH (d:Director)-[:DIRECTED]-(m)-[:ACTS_IN]-(a:Actor)
+RETURN d.name, COUNT(DISTINCT a.name)
+ORDER BY COUNT(DISTINCT a.name) DESC
+LIMIT 10
+
+11- WHERE a.birthday IS NOT NULL
+WITH MAX(date(dateTime({epochmillis:toInt(a.birthday)}))) as max
+MATCH (a2:Actor)
+WHERE a2.birthday IS NOT NULL
+AND date(dateTime({epochmillis:toInt(a2.birthday)})) = max
+RETURN a2.name, date(dateTime({epochmillis:toInt(a2.birthday)}))
+
+12- MATCH (a:Actor)-[ac:ACTS_IN]->(:Movie), (a)-[d:DIRECTED]->(:Movie) 
+WITH a.name AS nombre, COUNT(DISTINCT ac) AS cant_peliculas,COUNT(DISTINCT d) AS dirigidas 
+WHERE cant_peliculas>10 AND dirigidas>5 
+RETURN nombre
+
+13- MATCH (a:Actor)
+WHERE a.birthday IS NOT NULL
+WITH MIN(date(dateTime({epochmillis:toInt(a.birthday)}))) as min
+MATCH (a2:Actor)
+WHERE a2.birthday IS NOT NULL
+AND date(dateTime({epochmillis:toInt(a2.birthday)})) = min
+WITH a2 as actor_viejo
+MATCH s=shortestPath((kb:Actor{name:"Kevin Bacon"})-[*]-(actor_viejo))
+RETURN length(s)

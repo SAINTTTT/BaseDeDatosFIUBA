@@ -1,0 +1,22 @@
+BASE DE DATOS - Clase 13
+Base de datos espaciales
+
+Las BDD espaciales sirven para representar objetos de un espacio geometrico (puntos, poligonos, objetos 3D)
+Son parte de los GIS (sistemas de informacion geografica) que permiten almacenar y manipular datos geograficos y representarlos visualmente
+
+Las representaciones pueden ser VECTORIZADAS(vectores y bordes) y RASTERIZADAS (grillas o celdas)
+
+- Simple features
+Es el estandar que utilizan las BDD espaciales
+Define como agregar funcionalidades espaciales a las BDD a traves de una representacion vectorizada
+Sus funcionalidades basicas son GEOMETRIAS, METODOS BASICOS, PREDICADOS DE RELACION Y METODOS DE ANALISIS ESPACIAL (hoja 10 de las diapo)
+
+- Sistema de coordenadas (Spatial Reference ID)
+
+
+- Shapefiles
+En el .shp estan las formas geometricas asociadas
+
+
+
+

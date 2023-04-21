@@ -1,0 +1,71 @@
+BASE DE DATOS - Clase 16
+Recuperacion
+Que mecanismos implementan las BDD para recuperarse ante fallas, es decir, dejarla en un estado consistente
+Esta relacionado de alguna manera con las transacciones y concurrencia de las BDD (ACID, grafo de preferencias, etc..)
+------------------------------------------------------------------------------
+La recuperacion ayuda a la Atomicidad y a la Durabilidad de ACID mas precisamente
+
+Un solapamiento es RECUPERABLE si y solo si ninguna transaccion T realiza el commit hasta tanto todas las transacciones que escribieron datos antes de que T los leyera hayan commiteado
+Un solapamiento que es RECUPERABLE no tiene porque ser SERIALIZABLE
+Un solapamiento que es SERIALIZABLE no tiene porque ser RECUPERABLE
+
+Un SGBD no deberia permitir la ejecucion de un solapamiento no RECUPERABLE
+
+Para la recuperacion, el SGBD guarda un log con la informacion de los datos y los procesos que los utilizaron
+
+Si tengo un solapamiento recuperable, nunca debere deshacer transacciones que se hayan commiteado
+Sin embargo, quizas sea necesario hacer rollbacks en cascada de transacciones que aun no se commitearon
+
+Para evitar rollbacks en cascada es necesario que una transaccion no lea los valores que aun no fueron commiteados
+(avoid falling rollbacks)
+Si evita los rollbacks en cascada entonces es RECUPERABLE
+
+En SNAPSHOT ISOLATION no me tengo que preocupar por la recuperabilidad
+ESTO EN CUANTO A LA RECUPERABILIDAD EN TRANSACCIONES 
+
+---------------------------------------------------------------------------
+Ahora vemos RECUPERACION
+Puede haber varios tipo de fallas
+- Sistemas: Por errores en el software o hardware que detienen la ejecucion del programa
+- Aplicacion: Bug en la Aplicacion que utiliza la BDD
+- Dispositivos: Los que provienen de un daño fisico. Ej, se rompio el disco rigido (no estan contemplados por los algoritmos de hoy. HACER BACKUPS)
+- Naturales externas: Hay un incendio o terremoto y rompe todo (HACER BACKUPS x2)
+
+Los algoritmos que veremos son los que ayudan a solucionar casos como el 1 y 2
+
+Todos los SGBD tienen un log para saber que operaciones se realizaron
+
+- Hay que estudiar cual es el mecanismo de volcar el log en disco para guardar la informacion
+Puede ser INMEDIATA o DIFERIDA 
+Una es guardar los datos lo antes posible y necesariamente antes del commit
+La otra guarda los datos despues del commit de la transaccion
+
+- El gestor de logs se basa en las reglas WAL y FLC
+WAL: antes de guardar un item modificado en disco, hay que guardar el log modificado en disco
+FLC: antes de commitear el log debe ser volcado a disco
+
+- Algoritmos que permiten recuperar una BDD ante fallas (con solapamientos recuperables y que evitan rollbacks. Si no respetan estas premisas, debera realizar pasos previos para aplicar el algoritmo)
+UNDO (Deshacer)
+La regla primaria es que cuando una transaccion ya commiteo un valor V, el valor viejo de este debe ser guardado en el log en disco antes de ser modificado por otra transaccion
+Ver algoritmo en la presentacion (15)
+Si se reinicia el sistema, lo primero que hace es buscar las transacciones que no hicieron commit
+Lugo, por cada transaccion sin commit se escribe (ABORT, T) en el log y se flushea a disco
+
+REDO 
+Antes de commitear, tengo que guardar el valor nuevo de V en el log de disco
+
+UNDO/REDO
+Tenes libertad para elegir que mecanismo usar al momento de flushear en disco
+
+- Puntos de control
+Sirve para no recorrer todo el archivo de log. Es un registro que me indica que hasta ahi debo controlar
+Hay checkpoints ACTIVOS e INACTIVOS
+INACTIVOS: Suspende momentaneamente todas las transacciones hasta que se realice el flush en disco
+ACTIVOS: 
+
+
+
+
+-----------------------------------------------------------------------------------
+PRACTICA
+Concurrencia y Recuperacion

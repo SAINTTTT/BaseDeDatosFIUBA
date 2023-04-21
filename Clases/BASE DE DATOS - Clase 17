@@ -1,0 +1,61 @@
+BASE DE DATOS - Clase 17
+Data warehousing
+
+Tiene la orientacion de darle funcionalidad extra a la BDD
+
+- OLAP vs OLTP
+.OLTP o Capacidad Transaccional es la capacidad para procesar el volumen de datos de una empresa de acuerdo a su actividad
+Se desarrolla en una arquitectura de tres capas: presentacion, logica y de datos
+
+.OLAP es la capacidad analitica de procesamiento, es decir, de poder extraer informacion sintetica sobre esos datos almacenados para poder tomar decisiones
+
+Para todas estas actividades es necesario REDUCIR LA CANTIDAD DE DATOS Y PODER EXPRESAR CONSULTAS COMPLEJAS DE FROMA SIMPLE
+
+REGLAS OLAP: Son los servicios que debe brindar una herramienta de procesamiento analitico
+-Vista conceptual multidimensional
+-Manipulacion intuitiva de datos
+-Accesibilidad
+-Extraccion batch e interpretativa
+-Modelos de analisis
+-Arquitectura cliente-servidor
+
+El data warehouse es la copia paralela de los datos originales de una organizacion
+Los datos externos y los datos heterogeneos se les aplica procesos ETL y se convierten en la data warehouse
+
+- MODELO DIMENSIONAL (CONCEPTUAL Y LOGICO)
+. Modelo conceptual
+Diagrama de estrella
+En el modelo dimensional tomaremos y definiremos medidas sobre un conjunto de atributos y las denominaremos DIMENSIONES
+El HECHO es la medida numerica asociada a un valor concreto de una dimension
+
+Las tablas que describen las dimensiones se las denomina TABLA DE DIMENSIONES
+
+El diagrama de estrella permite comunicar las estructuras de dimensiones y hechos para saber de que se tratan los datos que almacena el data warehouse
+
+. Modelo logico
+Hay diferentes formas de almacenar los hechos sumarizados. Las implementaciones Son
+    MOLAP(multidimensional OLPA): Los datos agregados se guardan en BDD multidimensional o cubo de datos. (diccionarios, matrices, etc.)
+
+    ROLAP(Relational OLAP): La tabla de hechos agragada se almacena como una relacion mas
+
+    HOLAP(Hybrid OLAP): 
+
+En ROLAP se guarda la vista de la relacion (SQL view) y cada cierto tiempo se almacena su resultado completo (se materializa)
+El punto es elegir en que momento materializar las vistas
+
+
+- OPERACIONES OLAP
+. ROLL-UP consiste en subir un nivel en la jerarquia. Ej: En vez de verlo en nivel de meses, verlo a nivel de años
+. DRILL-DOWN es el opuesto de roll-up
+. PIVOTE es como rotar la vista del cubo de datos
+. SLICING O DICING es quedarse con una feta del cubo. Es como hacer una seleccion
+
+
+- SOPORTE SQL
+.GROUPING SETS
+
+.ROLLUP
+
+.CUBE
+
+.
