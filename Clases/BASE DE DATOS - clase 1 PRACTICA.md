@@ -42,4 +42,4 @@ INTERRELACIONES:
 En este caso, un jugador no puede pertenecer a mas de un equipo ya que se esta modelando un unico torneo, aunque el jugador se pueda ir a otro equipo en algun momento  
 - En las interrelaciones ternarias solo indicamos la cardinalidad maxima. 
 
-![Modelo](/home/aaron/Facultad/BaseDeDatos/Clases/img/modelo.png "Hola")
+![Alt text](img/modelo.png)
