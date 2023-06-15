@@ -36,3 +36,6 @@ ALTER TABLE public.colectivos_por_parada
     OWNER to postgres;
 ALTER TABLE public.colectivos_por_parada ADD CONSTRAINT pk_colectivos_por_parada PRIMARY KEY(cod_parada, num_colectivo);
 ALTER TABLE public.colectivos_por_parada ADD CONSTRAINT fk_colectivos_por_parada FOREIGN KEY(cod_parada) REFERENCES paradas(cod_parada) ON DELETE NO ACTION;
+
+
+SELECT * FROM paradas
