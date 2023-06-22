@@ -113,14 +113,14 @@ Un conflicto es un par de instrucciones I1 e I2 ejecutadas por distintas transac
     - WTi(x), RTj(x) : Una transaccion lee un item que otra escribio
     - WTi(x), WTj(x) : Dos transacciones escriben el mismo item
 En otras palabras, tenemos un conflicto cuando dos transacciones distintas ejecutan instrucciones sobre un mismo item X, y al menos una de las dos es una escritura (W(x))  
- >   Dos instrucciones de un solapamiento que no constituyen un conflicto pueden ser invertidas en su ejecucion obteniendo un solapamiento equivalente por conflictos. 
+ >  ## Dos instrucciones de un solapamiento que no constituyen un conflicto pueden ser invertidas en su ejecucion obteniendo un solapamiento equivalente por conflictos. 
 
 3. Equivalencias de vistas: Aca se pide que no solo los estados sean iguales, sino que los usuarios vean lo mismo en un momento determinado.
 
-> ***ALGO IMPORTANTE ES NO SWAPEAR INSTRUCCIONES DE UNA MISMA TRANSACCION YA QUE ESO ROMPE EL CRITERIO DE TRANSACCION***
+> # ***ALGO IMPORTANTE ES NO SWAPEAR INSTRUCCIONES DE UNA MISMA TRANSACCION YA QUE ESO ROMPE EL CRITERIO DE TRANSACCION***
 
 - **GRAFO DE PRECEDENCIAS** se forma con las transacciones T1...Tn como nodos y las aristas van a ser los conflictos entre ellas, donde los conflictos pueden ser unos de los 3 que vimos antes (RW, WR o WW). *Cada arco en el grafo va a representar una precedencia*. Si no hay conflictos, el grafo queda simplemente representado por sus nodos. 
- > TEOREMA: Un orden de ejecucion es serializable por conflictos si y solo si su grafo de PRECEDENCIAS no tiene ciclos
+ > ## TEOREMA: Un orden de ejecucion es serializable por conflictos si y solo si su grafo de PRECEDENCIAS no tiene ciclos
 
 
 - ALGORITMO PARA VER SI UN GRAFO TIENE CICLOS (https://youtu.be/S1SyPDvIZv0?t=8554)  
@@ -160,7 +160,7 @@ La transaccion se divide en dos fases:
 - la etapa de adquisicion de locks: donde la cantidad de locks crece 
 - la de liberacion: donde la cantidad de locks decrece
 
-El cumplimiento de 2PL garantiza que la ejecucion de transacciones es serializable. 
+> # El cumplimiento de 2PL garantiza que la ejecucion de transacciones es serializable. 
 
 Tener cuidado con los deadlocks (cuando una transaccion lockea un item y no lo libera) 
 y livelocks ()
@@ -184,7 +184,56 @@ Pueden ser cuatro niveles segun el estandar:  - READ UNCOMMITED: No hay aislamie
 
 
 ------------------------------------------------------------------------------------------------------------------
-CONTROL DE CONCURRENCIAS (cont.)
+# CONTROL DE CONCURRENCIAS (cont.)
 
-- BASADO EN TIMESTAMPS
+**BASADO EN TIMESTAMPS**
+Se asigna a cada transaccion Ti un timestamp TS(Ti). Los *timestamps* deben ser unicos y determinaran el orden serial del solapamiento.
+
+Ej:
+TS(Ti) = 52
+TS(Tj) = 76
+
+Se ejecutara entonces Ti -> Tj.
+
+Pueden aparecer conflictos pero siempre que respeten el orden de los timestamps.  
+Si una transaccion se ejecuta en un orden erroneo de acuerdo a su timestamp, se abortara y se hará un rollback de dicha transaccion.
+
+En todo momento se tiene la siguiente informacion:
+- ***read_TS(X)*** : Es el TS(T) correspondiente a la transaccion mas joven (de mayor TS(T)) que leyo el item X
+- ***write_TS(X)*** : Es el TS(T) correspondiente a la transaccion mas joven (de mayor TS(T)) que escribio el item X
+
+![Alt text](img/actualizacionDeTimestamps.png)
                                         
+
+EJ:  
+> R58(X) --> W56(X)  
+
+HAY QUE ABORTAR W56(X) YA QUE ALGUIEN POSTERIOR LEYÓ EL MISMO ITEM
+
+> ### **REGLA GENERAL: Abortar siempre que se lea un item con una transaccion de orden menor a la ultima lectura del mismo item**
+
+  
+![Alt text](img/THOMA'S%20RULE.png)
+
+Esto quiere decir que si mi T58 quiso escribir X y despues vino una T56 a querer escribir X tambien, puedo descartar T56 sin problema ya que no afecta a la serializacion
+
+
+
+----
+**SNAPSHOT ISOLATION** 
+
+Cada transaccion ve "una foto" de la BBDD commiteada al momento en que inició. Entonces cada transaccion, al momento de iniciar, sabe en que estado estan los datos de la BBDD.  
+
+Ventajas: Permite mayor solapamiento, ya que se puede realizar la mayoria de las lecturas.  
+Desventajas: Requiere mayor espacio en memoria o disco. Ademas, en conflictos WW siempre va a querer deshacer una.
+
+
+Sigue la regla de *first-commited-win*: si dos transacciones quieren modificar el mismo item, gana la que realice el commit primero.
+
+Esto, sumado a VALIDACION PERMANENTE DEL GRAFO DE PRECEDENCIAS Y LOCKS DE PREDICADOS garantizan la seriablidad.
+
+
+![Alt text](img/anomaliaDelFantasmaSolucion.png)
+
+
+
