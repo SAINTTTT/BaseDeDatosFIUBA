@@ -51,40 +51,46 @@ Las BDD NoSQL tienen estas funcionalidades entre otras:
 
 ----
 
-# BDD NoSQL KEY VALUE
+# BDD NoSQL KEY VALUE (DynamoDB)
 
-Se componen de agregados del tipo key-value (Ej: {"nombre": "Kiko"})
+Se componen de agregados del tipo key-value (Ej: {"nombre": "Kiko"})   
 Las claves son unicas y la unica condicion que tienen es que sean comparables por el =
 
 Las BDD tienen cuatro operaciones elementales: put, delete, update, get 
-- Ventajas: Simplicidad, ya que no se define un esquema, ni DDL, etc..
-            Velocidad ya que prioriza la eficiencia por sobre la integridad
-            Escalabilidad dada la capacidad de replicas
+- Ventajas: Simplicidad, ya que no se define un esquema, ni DDL, etc..  
+            Velocidad ya que prioriza la eficiencia por sobre la integridad  
+            Escalabilidad dada la capacidad de replicas y repartir consultas entre nodos.
 
 
-. Vemos el ejemplo de Dynamo, la key-value store de Amazon que utiliza HASHING CONSISTENTE
-Esta diseñado sobre una arquitectura orientada a servicio: la BDD esta distribuida en un server cluster que posee servidores web, routers de agregacion y nodos de procesamiento
+. Vemos el ejemplo de Dynamo, la key-value store de Amazon que utiliza **HASHING CONSISTENTE**  
+Esta diseñado sobre una arquitectura orientada a servicio: la BDD esta distribuida en un server cluster que posee servidores web, routers de agregacion y nodos de procesamiento (Dynamos instances)
 
-Para saber en nodo esta una determinada clave (LOOKUP) utiliza el metodo HASHING CONSISTENTE
-Tiene la ventaja de mover la cantidad de pares que son necesarios unicamente
+**HASHING CONSISTENTE** es el mecanismo de lookup. A partir de la clave, dado que es unica, aplica una funcion de hash para saber a que nodo va a ir ese fragmento
 
-Utiliza tambien el modelo de CONSISTENCIA EVENTUAL
-Los nodos son peers
+Para saber en que nodo esta una determinada clave (LOOKUP) utiliza el metodo HASHING CONSISTENTE  
+Tiene la ventaja de mover la cantidad de pares que son necesarios unicamente en el caso de que un nodo se caiga o sea borrado.
 
------------------------------------------------------------------------------------------------------------------------------------------------
-MODELOS DE CONSISTENCIA
+El **HASHING CONSISTENTE** no solo hashea los datos, sino que tambien hashea los nodos. 
+
+Utiliza tambien el modelo de **CONSISTENCIA EVENTUAL**  
+Los nodos son peers, por lo tanto es totalmente descentralizado. El identificador de cada nodo generalmente es su IP. 
+
+
+---
+## ***MODELOS DE CONSISTENCIA***
+
 Se relacionan con la REPLICACION de las bases de datos distribuidas
 No se puede usar sincronizacion de reloj en sistemas distribuidos porque siempre presentan un margen de error y las transacciones no los admiten
 
 Para sincronizar se utiliza el algoritmos de ORDENAR EVENTOS
 
-- De estos algoritmos provienen los modelos de CONSISTENCIA SECUENCIAL,
-Una BDD es de este tipo si el resultado de cualquier ejecucion concurrente de los procesos es equivalente al de alguna ejecucion secuencial de las mismas instrucciones
+- De estos algoritmos provienen los modelos de CONSISTENCIA SECUENCIAL,  
+Una BDD es de este tipo si el resultado de cualquier ejecucion concurrente de los procesos es equivalente al de alguna ejecucion secuencial de las mismas instrucciones.
 
 En otras palabras, si encontramos un orden secuencial logico que represente lo que ve el usuario, decimos que tiene CONSISTENCIA SECUENCIAL
 
 
-- El modelo de CONSISTENCIA CAUSAL busca capturar eventos que sean causados uno del otro
+- El modelo de CONSISTENCIA CAUSAL busca capturar eventos que sean causados uno del otro  
 Para ver un evento A, antes tienen que ver todos los eventos Bi que hayan influenciado a A
 
 Dos escrituras causadas potencialmente deben ser vista por todos en el mismo orden que se realizaron
@@ -187,7 +193,7 @@ Operaciones:
 Cada etapa devuelve una coleccion. Por lo tanto, la salida de una etapa es la entrada de la siguiente.
 
 
-- SHARDING es el mecanismo que usa MongoDB para distribuir el procesamiento.  
+>**SHARDING** es el mecanismo que usa MongoDB para distribuir el procesamiento.  
 Consiste en distribuir horizontalmente las colecciones en CHUNKS que se desparraman en cada SHARDS
 
 Un SHARDING CLUSTER de MongoDB esta formado por:
@@ -206,41 +212,56 @@ Los SHARDING tienen restricciones:
     No se puede cambiar la shard key una vez hecho el sharding
     Tampoco se puede unshardear una coleccion shardeada
 
-El SHARDING permite disminuir el tiempo de respuesta al distribuir el procesamiento y de realizar consultas sobre un conjunto de datos muy grandes que no cabrian en un solo servidor
+El SHARDING permite disminuir el tiempo de respuesta al distribuir el procesamiento y de realizar consultas sobre un conjunto de datos muy grandes que no cabrian en un solo servidor. Para esto es fundamental el indice de la shard key.
 La idea es que la BDD sea escalable para Big Data
 
 MongoDB birnda un mecanismo de tolerancia a fallas basado en replicacion de shards
-Consiste en nodos primarios y secundarios. Los secundarios ademas de ser para backup sirven para realizar consultas pero solo de lectura
+Consiste en nodos primarios y secundarios. Los secundarios ademas de ser para backup sirven para realizar consultas pero solo de lectura.
 Las escrituras (y lecturas tambien) solo se realizan en el primario.
 
-------------------------------------------------------------------------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------------------------------------------------------------------------
-BASES DE DATOS WIDE COLUMN
-Agrega todos los datos que pertenecen a una clave primaria en columnas
+El esquema de replicas de MongoDB es el **master-slave with automated failover**. Consiste en en que cada shard contiene un servidor mongod primario y uno o mas servidores mongod secundarios (mongod es mi servidor que levanta la DB). Las replicas eligen entonces un master a traves de un algoritmo. En caso de que el master falle, los slaves eligen un nuevo master entre si.
+
+
+
+---
+# BASES DE DATOS WIDE COLUMN (Cassandra)
+Agrega todos los datos que pertenecen a una clave primaria en columnas  
 No es estrictamente orientada a columnas. 
 
 Veremos el caso de Cassandra, que es un hibrido de wide-column y clave-valor
 No es libre de esquemas como MongoDB. Posee una arquitectura share-nothing donde no existe un estado compartido centralizado
-Esto quiere decir que todos los nodos son iguales
+Esto quiere decir que todos los nodos son iguales y esto hace que sea altamente escalable
 
-RELACIONALES        Cassandra
-esquema     ----->  Keyspace
-Tabla       ----->  Column family
-Fila        ----->  Fila
+| RELACIONALES |        Cassandra|
+|---|---|
+|esquema |      Keyspace |
+|Tabla |         Column family| 
+|Fila   |       Fila |
 
-Una fila esta compuesta de una clave compuesta y un conjunto de claves-valor o columnas
-Es decir, una columna no es mas que un par de clave-valor asociado a una clave
+Una **fila** esta compuesta de una clave compuesta y un conjunto de claves-valor o columnas
+Es decir, una columna no es mas que un par de clave-valor asociado a una clave. Asi, cada vez que hay una nueva insercion, simplemente se busca la clave y se le agrega una columna con el nuevo dato a esa fila. De aqui que tambien se las considera **wide row**.
 
 Usa el lenguaje CQL que no se parece en potencia a SQL, solo se limita al SELECT FROM WHERE
 
 Las claves primarias estaran divididas en dos partes: la clave de particion y la clave de clustering
-Cada clave de particion identifica un agregado y cada clave de clustering identifica una fila
-Por ejemplo, en el caso de una libreria con clientes, podriamos diseñar la BDD de tal forma que la clave de particion sea algun tipo de dato
-que identifica al cliente y luego en cada fila estarian los datos de cada libro que compro, donde el ISBN seria la clave de clustering
-No es obligatorio tener una clave de clustering
+Cada clave de particion identifica un agregado (un wide row) y cada clave de clustering identifica una fila.  
+Por ejemplo, en el caso de una libreria con clientes, podriamos diseñar la BDD de tal forma que la clave de particion sea algun tipo de dato que identifica al cliente y luego en cada fila estarian los datos de cada libro que compro, donde el ISBN seria la clave de clustering.
+
+La clave de particion es la clave primaria, por lo que debe ser la misma para todas las filas (Padron, DNI, ISBN, etc..)
+No es obligatorio tener una clave de clustering  
+
 Recordar que en el WHERE solo puede haber atributos que pertenezcan a la clave primaria
 
+> Las claves no deben obligatoriamente ser minimales
+
 Al momento de hacer las consultas, se utiliza la clave de particion que es la que se compara por el operador igual (=)
+
+Tambien implementa el metodo de HASHING CONSISTENTE para el almacenamiento de los datos/nodos en cada cluster.
+
+El diseño de Cassandra impone:
+- Las columnas de las partition key deben ser comparadas por = contra valores constantes.
+- Si una columna de la clustering key es usada en una condicion del predicado, las restantes columnas de la key que la preceden tambien deben ser usadas en algun otro predicado.
+- 
 
 PUNTOS PARA DISEÑAR UNA BASE DE DATOS
 - En Cassandra tampoco existe el concepto de junta, asi que cualquier resultado parecido a este debe ser guardado desde el principio como una tabla mas
@@ -249,10 +270,152 @@ PUNTOS PARA DISEÑAR UNA BASE DE DATOS
 - Diseño orientado a consultas, es decir, el modelo estara basado en que tipo de consultas realizaremos
 
 
-Diagrama Chebotko
+***Diagrama Chebotko***  
 Busca que cada consulta se resuelva accediendo a una unica column family, los resultados esten en una unica particion y se respete el lenguaje CQL 
 Ejemplo de esto en el video https://youtu.be/lGbHIbn7giU?t=1490
 
-Cassandra esta optimizado para altas tasas de escrituras, donde utiliza un arbol llamado LSM-tree
+Metodo de acceso:  
+Cassandra esta optimizado para altas tasas de escrituras, donde utiliza un arbol llamado LSM-tree. Este tipo de arbol busca ofrecer un acceso secuencial a los datos, dado que el acceso aleatorio es muy costoso.
+Alguna de sus mejoras son :
+- Mantener mas de un nivel en disco
+- Mantener varios archivos por cada nivel y mergearlos cuando superan un umbral.
+- Utilizar Bloom filters para verificar si una entrada podria estar en uno de los archivos.
 
 
+
+
+---
+# NoSQL orientado a grafos (Neo4j)
+
+BASES DE DATOS ORIENTADA A GRAFOS (Neo4j)
+Aca la estructura es la de un grafo, es decir, que hay nodos y arcos.  
+Las BDD orientadas a grafos sirven para modelar interrelaciones mas complejas entre las entidades. Aca no nos preocupamos tanto por los datos, sino por las interrelaciones.  
+No tienen el concepto de agregado a diferencia de los demas NoSQL.
+
+Es muy buena esta tecnologia para casos en donde hay muchas interrelaciones unarias (ej: persona con persona modela HijoDe).  
+En estas BDD existen una LISTA DE ADYACENCIAS que contiene todos los nodos adyacentes de cada nodo. Cada nodo tiene su lista con los nodos vecinos.  
+Los arcos siempres son direccionales en Neo4j, aunque no es necesario indicarle siempre la direccion.
+
+Utiliza un lenguaje declarativo llamado Cypher
+
+La BDD esta formada por nodos, donde cada nodo tiene uno o varios labels o etiquetas (ej: Persona)  
+
+    (tom:Persona {nombre: 'Tomas', color: 'Azul', prof: 'Estudiante'})
+
+Dentro de cada label, el nodo tiene propiedades con valores.
+
+No sigue ninguna estructura por lo que a mis nodos pueden tener las propiedades que quieran. 
+
+Ejemplo de consulta en Cypher: 
+
+    MATCH (p:Persona {nombre: ‘María’}) RETURN p.nombre, p.prof
+
+"p:persona" le indica primero un alias 'p' que no se guarda, sino que es utilizado solo en la consulta
+Luego le dice que busque todas las cosas que sean "Persona" cuyo "nombre" sea "Maria" y las trabaje como 'p'
+Es analogo a poner un WHERE p.nombre = Maria
+
+Los arcos o interrelaciones tienen que tener nombre y opcionalmente puede tener un atributo. Tienen que ser direccionales  
+Ej:   
+
+    CREATE (juan)−[:AMIGO_DE]−>(lucas)
+
+Tambien es necesario que tenga una flecha para algun lado, es decir, tiene que ser dirigido  
+Este tipo de notacion marcando el vinculo sirve tambien para otras operaciones
+
+*ESTE ES EL ESQUEMA BASICO DE NEO4J*
+> MATCH  
+WHERE  
+RETURN
+
+EJ:     
+
+    MATCH (n:Persona)−[:AMIGO_DE]−(m:Persona),
+              (m:Persona)−[:AMIGO_DE]−(o:Persona),
+              (n:Persona)−[:ENEMIGO_DE]−(o:Persona)
+        RETURN n.nombre, o.nombre
+
+Con un * puedo indicar la cantidad de saltos entre dos nodos  
+Ej:
+
+     MATCH (a:Actor)-[*4]-(kb:Actor {name:"Kevin Bacon"}) RETURN a.name
+
+Esto devuelve los actores que estan a distancia 4 de Kevin Bacon
+
+En definitiva, Neo4j trabaja con patrones en sus declaraciones  
+Un patron puede especificarse a traves de los nodos y sus propiedades, una interrelacion y sus propiedades, o un camino y sus propiedades  
+A cada patron se le puede asignar un nombre (el alias)
+
+Las operaciones de agregacion siempre se realizan en el RETURN (count(*), sum(), max())
+
+Neo4j establece que no puede haber un nodo repetido mas de una vez en un patron.
+
+
+> Ej: Buscar los ancestros de Victor
+
+    MATCH (victor:Persona {nombre:‘Victor ’}),
+    (p:Persona)<−[:HIJO_DE *]−(victor:Persona)
+    RETURN DISTINCT p.nombre
+----
+
+
+
+
+(((((((((((((PRACTICA)))))))))))))))))))))))
+
+call db.schema() me da una vision general del grafo. Me da los nodos y aristas
+
+El PATRON DE NODOS es la semantica para indicar los nodos. La unica condicion obligatoria es que este entre parentesis
+En una REGEX, el '.' indica 'cualquier caracter' y el '*' indica que puede aparecer N veces
+
+
+
+Ejercicios de la diapositiva 
+((((((((((TALLER)))))))))))))))
+1- MATCH (m {genre:"Science Fiction"}) RETURN m.title ORDER BY m.title LIMIT 10
+
+2- MATCH (m:Movie) WHERE m.genre="Drama" AND  m.studio =~".*Pictures.*" RETURN m.title, m.studio
+
+3- MATCH(a:Actor) WHERE a:Director AND a.birthday IS NOT NULL RETURN date(dateTime({epochmillis:toInt(a.birthday)})) LIMIT 20
+
+Otra opcion de la 3
+MATCH (a:Actor:Director) WHERE a.birthday IS NOT NULL RETURN ....
+
+4- MATCH (d:Director)-[dir:DIRECTED]->(m:Movie) WHERE d.name = "Oliver Stone" return d,m
+
+5- MATCH (a:Actor)-[ac:ACTS_IN]->(m:Movie)<-[ac2:ACTS_IN]-(th:Actor {name:"Tom Hanks"}) RETURN DISTINCT a.name ORDER BY a.name
+
+6- MATCH (a:Actor)-[*4]-(kb:Actor {name:"Kevin Bacon"}) RETURN a.name LIMIT 10
+
+7- MATCH (wa:Director {name:"Woody Allen"})-[d:DIRECTED]->(m:Movie) WHERE NOT (wa)-[:ACTS_IN]->(m) RETURN wa,m
+
+8- MATCH sp=shortestPath((kb: Actor {name:"Kevin Bacon"})-[*]-(mr: Actor {name:"Meg Ryan"})) RETURN sp
+
+9- MATCH (a:Actor)-[:ACTS_IN]-(m:Movie{title:"The Matrix"}), (a)-[:ACTS_IN]-(m2:Movie{title:"The Matrix Reloaded"}),
+(a)-[:ACTS_IN]-(m3:Movie{title:"The Matrix Revolutions"}) RETURN a.name
+
+10- MATCH (d:Director)-[:DIRECTED]-(m)-[:ACTS_IN]-(a:Actor)
+RETURN d.name, COUNT(DISTINCT a.name)
+ORDER BY COUNT(DISTINCT a.name) DESC
+LIMIT 10
+
+11- WHERE a.birthday IS NOT NULL
+WITH MAX(date(dateTime({epochmillis:toInt(a.birthday)}))) as max
+MATCH (a2:Actor)
+WHERE a2.birthday IS NOT NULL
+AND date(dateTime({epochmillis:toInt(a2.birthday)})) = max
+RETURN a2.name, date(dateTime({epochmillis:toInt(a2.birthday)}))
+
+12- MATCH (a:Actor)-[ac:ACTS_IN]->(:Movie), (a)-[d:DIRECTED]->(:Movie) 
+WITH a.name AS nombre, COUNT(DISTINCT ac) AS cant_peliculas,COUNT(DISTINCT d) AS dirigidas 
+WHERE cant_peliculas>10 AND dirigidas>5 
+RETURN nombre
+
+13- MATCH (a:Actor)
+WHERE a.birthday IS NOT NULL
+WITH MIN(date(dateTime({epochmillis:toInt(a.birthday)}))) as min
+MATCH (a2:Actor)
+WHERE a2.birthday IS NOT NULL
+AND date(dateTime({epochmillis:toInt(a2.birthday)})) = min
+WITH a2 as actor_viejo
+MATCH s=shortestPath((kb:Actor{name:"Kevin Bacon"})-[*]-(actor_viejo))
+RETURN length(s)
